@@ -12,15 +12,35 @@
 $msfiles_removal_utility = new MSFiles_Removal_Utility();
 
 class MSFiles_Removal_Utility {
-
+	/**
+	 * MSFiles_Removal_Utility::__construct
+	 * 
+	 * get hooked in
+	 *
+	 * @return void
+	 */
 	function __construct() {
-		add_action( 'network_admin_menu', array( &$this, 'menu' ) );
+		add_action( 'network_admin_menu', array( &$this, 'network_admin_menu' ) );
 	}
 
-	function menu() {
+	/**
+	 * MSFiles_Removal_Utility::network_admin_menu
+	 * 
+	 * Create a page in the Network Admin
+	 *
+	 * @return void
+	 */
+	function network_admin_menu() {
 		add_submenu_page( 'settings.php', 'ms-files.php removal utility', 'ms-files.php removal utility', 'edit_posts', __FILE__, array( &$this, 'page' ) );
 	}
 
+	/**
+	 * MSFiles_Removal_Utility::page
+	 * 
+	 * Page content
+	 *
+	 * @return void
+	 */
 	function page() {
 		?><div class="wrap">
 		<h2><?php _e('ms-files.php removal utility'); ?></h2>
@@ -72,7 +92,9 @@ mv files BLOG_ID</pre>
 	}
 
 	/**
-	 * update_all_blogs
+	 * MSFiles_Removal_Utility::update_all_blogs
+	 *
+	 * Perform the updates per-blog
 	 *
 	 * @param bool $test true to keep things safe. false to perform changes
 	 * @return void
@@ -177,6 +199,14 @@ mv files BLOG_ID</pre>
 
 	}
 
+	/**
+	 * MSFiles_Removal_Utility::mods_restore_types
+	 * 
+	 * make sure the parts that need to be arrays not objects (json's fault) are arrays
+	 *
+	 * @param object|array $mods Theme mods 
+	 * @return array Theme modes with correct casting
+	 */
 	function mods_restore_types( $mods ) {
 		$mods = (array) $mods;
 
@@ -188,11 +218,29 @@ mv files BLOG_ID</pre>
 		return $mods;
 	}
 
+	/**
+	 * MSFiles_Removal_Utility::update_theme_mods
+	 * 
+	 * Update all theme mods at once
+	 *
+	 * @param array $mods Theme mods
+	 * @return void
+	 */
 	function update_theme_mods( $mods ) {
 		$theme_slug = get_option( 'stylesheet' );
 		update_option( "theme_mods_$theme_slug", $mods );
 	}
 
+	/**
+	 * MSFiles_Removal_Utility::str_replace_json
+	 * 
+	 * Convert multi-dimensional array to json, peform str_replace, convert back
+	 *
+	 * @param string $search What to find
+	 * @param string $replace What to replace in
+	 * @param object|array $subject Multi-dimensional array or object
+	 * @return object
+	 */
 	function str_replace_json( $search, $replace, $subject ) {
 
 		$json = json_encode($subject);
@@ -206,6 +254,16 @@ mv files BLOG_ID</pre>
 	}
 
 
+	/**
+	 * MSFiles_Removal_Utility::update_db_tables
+	 * 
+	 * get hooked in
+	 *
+	 * @param string $old What to find
+	 * @param string $new What to replace in
+	 * @param bool $test Is this a test or real
+	 * @return int|string Number of rows affected by query, or the SQL string if testing 
+	 */
 	function update_db_tables( $old, $new, $test=true ) {
 		global $wpdb;
 
@@ -224,7 +282,14 @@ $q = "
 		return $return;
 	}
 
-	// only if we're domain mapped
+	/**
+	 * MSFiles_Removal_Utility::get_mapped_url
+	 * 
+	 * Get domain mapped URL
+	 *
+	 * @param int $blog_id Blog ID to get domain of
+	 * @return string Domain name
+	 */
 	function get_mapped_url( $blog_id ) {
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->dmtable} WHERE blog_id = %d", $blog_id ) );
